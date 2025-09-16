@@ -6,12 +6,70 @@ namespace StringManipulationChallenge
     {
         static void Main(string[] args)
         {
-            /*
-            *
-            * implement the required code here and within the methods below.
-            *
-            */
-            //when you call a method, you call it with arguments. The args values are held in a variable.
+            Console.WriteLine("=== String Manipulation Challenge ===\n");
+
+            // Test StringToUpper
+            Console.Write("Enter a string to convert to uppercase: ");
+            string userInput = Console.ReadLine();
+            string upperResult = StringToUpper(userInput);
+            Console.WriteLine($"Uppercase result: {upperResult}\n");
+
+            // Test StringToLower
+            Console.Write("Enter a string to convert to lowercase: ");
+            string lowerInput = Console.ReadLine();
+            string lowerResult = StringToLower(lowerInput);
+            Console.WriteLine($"Lowercase result: {lowerResult}\n");
+
+            // Test StringTrim
+            Console.Write("Enter a string with whitespace to trim: ");
+            string trimInput = Console.ReadLine();
+            string trimResult = StringTrim(trimInput);
+            Console.WriteLine($"Trimmed result: '{trimResult}'\n");
+
+            // Test StringSubstring
+            Console.Write("Enter a string for substring extraction: ");
+            string substringInput = Console.ReadLine();
+            Console.Write("Enter starting index: ");
+            int startIndex = int.Parse(Console.ReadLine());
+            Console.Write("Enter length: ");
+            int length = int.Parse(Console.ReadLine());
+            
+            try
+            {
+                string substringResult = StringSubstring(substringInput, startIndex, length);
+                Console.WriteLine($"Substring result: '{substringResult}'\n");
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                Console.WriteLine("Invalid substring parameters!\n");
+            }
+
+            // Test SearchChar
+            Console.Write("Enter a string to search in: ");
+            string searchInput = Console.ReadLine();
+            Console.Write("Enter a character to search for: ");
+            string charInput = Console.ReadLine();
+            
+            if (!string.IsNullOrEmpty(charInput))
+            {
+                char searchChar = charInput.Trim()[0]; // Use Trim as hinted
+                int charIndex = SearchChar(searchInput, searchChar);
+                if (charIndex >= 0)
+                    Console.WriteLine($"Character '{searchChar}' found at index: {charIndex}\n");
+                else
+                    Console.WriteLine($"Character '{searchChar}' not found!\n");
+            }
+
+            // Test ConcatNames
+            Console.Write("Enter first name: ");
+            string firstName = Console.ReadLine();
+            Console.Write("Enter last name: ");
+            string lastName = Console.ReadLine();
+            string fullName = ConcatNames(firstName, lastName);
+            Console.WriteLine($"Full name: {fullName}\n");
+
+            Console.WriteLine("Press any key to exit...");
+            Console.ReadKey();
         }
 
         /// <summary>
@@ -19,11 +77,10 @@ namespace StringManipulationChallenge
         /// 1) change the string to all upper case and 
         /// 2) return the new string.
         /// </summary>
-        /// <param name="usersString"></param>
+        /// <param name="myString"></param>
         /// <returns></returns>
-        public static string StringToUpper(string myString)// the method itself has 'parameters'
+        public static string StringToUpper(string myString)
         {
-            // throw new NotImplementedException("StringToUpper method not implemented.");
             return myString.ToUpper();
         }
 
@@ -39,6 +96,13 @@ namespace StringManipulationChallenge
             return usersString.ToLower();
         }
 
+        /// <summary>
+        /// This method has one string parameter and will:
+        /// 1) remove whitespace from the beginning and end of the string,
+        /// 2) return the trimmed string.
+        /// </summary>
+        /// <param name="usersStringWithWhiteSpace"></param>
+        /// <returns></returns>
         public static string StringTrim(string usersStringWithWhiteSpace)
         {
             return usersStringWithWhiteSpace.Trim();
@@ -52,7 +116,7 @@ namespace StringManipulationChallenge
         /// </summary>
         /// <param name="x"></param>
         /// <param name="firstElement"></param>
-        /// <param name="lastElement"></param>
+        /// <param name="lengthOfSubsring"></param>
         /// <returns></returns>
         public static string StringSubstring(string x, int firstElement, int lengthOfSubsring)
         {
@@ -88,9 +152,5 @@ namespace StringManipulationChallenge
         {
             return $"{fName} {lName}";
         }
-                public static string ConcatNames(string fName, string lName)
-                {
-                    return $"{fName} {lName}";
-                }
-            }
-        }
+    }
+}
