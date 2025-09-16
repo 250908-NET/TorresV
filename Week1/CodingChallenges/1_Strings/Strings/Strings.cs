@@ -12,8 +12,6 @@ namespace StringManipulationChallenge
             *
             */
             //when you call a method, you call it with arguments. The args values are held in a variable.
-
-
         }
 
         /// <summary>
@@ -38,20 +36,12 @@ namespace StringManipulationChallenge
         /// <returns></returns>       
         public static string StringToLower(string usersString)
         {
-            throw new NotImplementedException("StringToUpper method not implemented.");
+            return usersString.ToLower();
         }
 
-        /// <summary>
-        /// This method has one string parameter and will:
-        /// 1) trim the whitespace from before and after the string, and
-        /// 2) return the new string.
-        /// HINT: When getting input from the user (you are the user), try inputting "   a string with whitespace   " to see how the whitespace is trimmed.
-        /// </summary>
-        /// <param name="usersStringWithWhiteSpace"></param>
-        /// <returns></returns>
         public static string StringTrim(string usersStringWithWhiteSpace)
         {
-            throw new NotImplementedException("StringTrim method not implemented.");
+            return usersStringWithWhiteSpace.Trim();
         }
 
         /// <summary>
@@ -66,7 +56,7 @@ namespace StringManipulationChallenge
         /// <returns></returns>
         public static string StringSubstring(string x, int firstElement, int lengthOfSubsring)
         {
-            throw new NotImplementedException("StringSubstring method not implemented.");
+            return x.Substring(firstElement, lengthOfSubsring);
         }
 
         /// <summary>
@@ -81,7 +71,7 @@ namespace StringManipulationChallenge
         /// <returns></returns>
         public static int SearchChar(string userInputString, char charUserWants)
         {
-            throw new NotImplementedException("SearchChar method not implemented.");
+            return userInputString.IndexOf(charUserWants);
         }
 
         /// <summary>
@@ -96,7 +86,11 @@ namespace StringManipulationChallenge
         /// <returns></returns>
         public static string ConcatNames(string fName, string lName)
         {
-            throw new NotImplementedException("ConcatNames method not implemented.");
+            return $"{fName} {lName}";
         }
-    }//end of program
-}
+                public static string ConcatNames(string fName, string lName)
+                {
+                    return $"{fName} {lName}";
+                }
+            }
+        }
