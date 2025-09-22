@@ -7,13 +7,46 @@ namespace StringManipulationChallenge
         static void Main(string[] args)
         {
             /*
-            *
-            * implement the required code here and within the methods below.
-            *
+            * Implement the required code here and within the methods below.
+            * When you call a method, you call it with arguments. The args values are held in a variable.
             */
-            //when you call a method, you call it with arguments. The args values are held in a variable.
-
-
+            
+            Console.WriteLine("=== String Manipulation Challenge ===\n");
+            
+            // Test StringToUpper
+            string testString = "hello world";
+            string upperResult = StringToUpper(testString);
+            Console.WriteLine($"Original: '{testString}' -> Upper: '{upperResult}'");
+            
+            // Test StringToLower
+            string upperString = "HELLO WORLD";
+            string lowerResult = StringToLower(upperString);
+            Console.WriteLine($"Original: '{upperString}' -> Lower: '{lowerResult}'");
+            
+            // Test StringTrim
+            string stringWithWhitespace = "   hello world   ";
+            string trimmedResult = StringTrim(stringWithWhitespace);
+            Console.WriteLine($"Original: '{stringWithWhitespace}' -> Trimmed: '{trimmedResult}'");
+            
+            // Test StringSubstring
+            string fullString = "Hello World Programming";
+            string substringResult = StringSubstring(fullString, 6, 5); // Gets "World"
+            Console.WriteLine($"Substring of '{fullString}' starting at index 6, length 5: '{substringResult}'");
+            
+            // Test SearchChar
+            string searchString = "Programming";
+            char searchChar = 'g';
+            int charIndex = SearchChar(searchString, searchChar);
+            Console.WriteLine($"First occurrence of '{searchChar}' in '{searchString}' is at index: {charIndex}");
+            
+            // Test ConcatNames
+            string firstName = "John";
+            string lastName = "Doe";
+            string fullName = ConcatNames(firstName, lastName);
+            Console.WriteLine($"Concatenated name: '{fullName}'");
+            
+            Console.WriteLine("\nPress any key to exit...");
+            Console.ReadKey();
         }
 
         /// <summary>
@@ -21,11 +54,10 @@ namespace StringManipulationChallenge
         /// 1) change the string to all upper case and 
         /// 2) return the new string.
         /// </summary>
-        /// <param name="usersString"></param>
+        /// <param name="myString"></param>
         /// <returns></returns>
-        public static string StringToUpper(string myString)// the method itself has 'parameters'
+        public static string StringToUpper(string myString)
         {
-            // throw new NotImplementedException("StringToUpper method not implemented.");
             return myString.ToUpper();
         }
 
@@ -38,7 +70,7 @@ namespace StringManipulationChallenge
         /// <returns></returns>       
         public static string StringToLower(string usersString)
         {
-            throw new NotImplementedException("StringToUpper method not implemented.");
+            return usersString.ToLower();
         }
 
         /// <summary>
@@ -51,7 +83,7 @@ namespace StringManipulationChallenge
         /// <returns></returns>
         public static string StringTrim(string usersStringWithWhiteSpace)
         {
-            throw new NotImplementedException("StringTrim method not implemented.");
+            return usersStringWithWhiteSpace.Trim();
         }
 
         /// <summary>
@@ -62,16 +94,16 @@ namespace StringManipulationChallenge
         /// </summary>
         /// <param name="x"></param>
         /// <param name="firstElement"></param>
-        /// <param name="lastElement"></param>
+        /// <param name="lengthOfSubstring"></param>
         /// <returns></returns>
-        public static string StringSubstring(string x, int firstElement, int lengthOfSubsring)
+        public static string StringSubstring(string x, int firstElement, int lengthOfSubstring)
         {
-            throw new NotImplementedException("StringSubstring method not implemented.");
+            return x.Substring(firstElement, lengthOfSubstring);
         }
 
         /// <summary>
         /// This method has two parameters, one string and one char. It will:
-        /// 1) search the string parameter for first occurrance of the char parameter and
+        /// 1) search the string parameter for first occurrence of the char parameter and
         /// 2) return the index of the char.
         /// HINT: Think about how StringTrim() (above) would be useful in this situation
         /// when getting the char from the user. 
@@ -81,7 +113,7 @@ namespace StringManipulationChallenge
         /// <returns></returns>
         public static int SearchChar(string userInputString, char charUserWants)
         {
-            throw new NotImplementedException("SearchChar method not implemented.");
+            return userInputString.IndexOf(charUserWants);
         }
 
         /// <summary>
@@ -96,7 +128,7 @@ namespace StringManipulationChallenge
         /// <returns></returns>
         public static string ConcatNames(string fName, string lName)
         {
-            throw new NotImplementedException("ConcatNames method not implemented.");
+            return fName + " " + lName;
         }
     }//end of program
 }
