@@ -15869,6 +15869,7 @@ SELECT
     SUM(Total) AS TotalSales
 FROM Invoice
 WHERE YEAR(InvoiceDate) = 2009;
+--*****************************************************************************************
  -- (challenge: find the invoice count sales total for every year using one query)
 SELECT 
     YEAR(InvoiceDate) AS Year,
@@ -15877,10 +15878,12 @@ SELECT
 FROM Invoice
 GROUP BY YEAR(InvoiceDate)
 ORDER BY Year;
+--*****************************************************************************************
 -- how many line items were there for invoice #37
 SELECT COUNT(*) AS LineItems
 FROM InvoiceLine
 WHERE InvoiceId = 37;
+--*****************************************************************************************
 -- how many invoices per country? BillingCountry  # of invoices -
 SELECT 
     BillingCountry,
@@ -15888,7 +15891,7 @@ SELECT
 FROM Invoice
 GROUP BY BillingCountry
 ORDER BY NumberOfInvoices DESC;
-
+--*****************************************************************************************
 -- Retrieve the total sales per country, ordered by the highest total sales first.
 SELECT 
     BillingCountry,
@@ -15896,3 +15899,45 @@ SELECT
 FROM Invoice
 GROUP BY BillingCountry
 ORDER BY TotalSales DESC;
+--*****************************************************************************************
+-- 1. Every Album by Artist
+SELECT 
+    ar.Name AS ArtistName,
+    al.Title AS AlbumTitle
+FROM Artist ar
+JOIN Album al ON ar.ArtistId = al.ArtistId
+ORDER BY ar.Name, al.Title;
+--*****************************************************************************************
+-- 2. All songs of the rock genre
+SELECT 
+    t.Name AS TrackName,
+    al.Title AS AlbumTitle,
+    ar.Name AS ArtistName
+FROM Track t
+JOIN Album al ON t.AlbumId = al.AlbumId
+JOIN Artist ar ON al.ArtistId = ar.ArtistId
+JOIN Genre g ON t.GenreId = g.GenreId
+WHERE g.Name = 'Rock'
+ORDER BY ar.Name, al.Title, t.Name;
+--*****************************************************************************************
+SELECT 
+    i.InvoiceId,
+    i.InvoiceDate,
+    i.Total,
+    CONCAT(c.FirstName, ' ', c.LastName) AS CustomerName
+FROM Invoice i
+JOIN Customer c ON i.CustomerId = c.CustomerId
+WHERE c.Country = 'Brazil'
+ORDER BY i.InvoiceDate;
+--*****************************************************************************************
+SELECT 
+    i.InvoiceId,
+    i.InvoiceDate,
+    i.Total,
+    CONCAT(c.FirstName, ' ', c.LastName) AS CustomerName,
+    CONCAT(e.FirstName, ' ', e.LastName) AS SalesAgentName
+FROM Invoice i
+JOIN Customer c ON i.CustomerId = c.CustomerId
+JOIN Employee e ON c.SupportRepId = e.EmployeeId
+ORDER BY i.InvoiceDate;
+
