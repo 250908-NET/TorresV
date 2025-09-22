@@ -7,10 +7,10 @@
    Author: Luis Rocha
    License: http://www.codeplex.com/ChinookDatabase/license
 ********************************************************************************/
-CREATE DATABASE MyDatabase;
+CREATE DATABASE VTDatabase;
 GO
 
-USE MyDatabase;
+USE VTDatabase;
 
 /*******************************************************************************
    Create Tables
@@ -15818,3 +15818,81 @@ INSERT INTO [dbo].[PlaylistTrack] ([PlaylistId], [TrackId]) VALUES (17, 2095);
 INSERT INTO [dbo].[PlaylistTrack] ([PlaylistId], [TrackId]) VALUES (17, 2096);
 INSERT INTO [dbo].[PlaylistTrack] ([PlaylistId], [TrackId]) VALUES (17, 3290);
 INSERT INTO [dbo].[PlaylistTrack] ([PlaylistId], [TrackId]) VALUES (18, 597);
+-- See all tables
+SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE';
+
+-- Test query
+SELECT TOP 5 * FROM Artist;
+
+SELECT TABLE_NAME
+FROM INFORMATION_SCHEMA.TABLES
+WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_CATALOG = 'VTDatabase';
+--*****************************************************************************************
+SELECT * FROM Customer;
+--*****************************************************************************************
+-- 1. List all customers (full name, customer id, and country) who are not in the USA
+SELECT 
+    CONCAT(FirstName, ' ', LastName) AS FullName,
+    CustomerId,
+    Country
+FROM Customer
+WHERE Country != 'USA';
+--*****************************************************************************************
+-- 2. List all customers from Brazil
+SELECT 
+    CONCAT(FirstName, ' ', LastName) AS FullName,
+    CustomerId,
+    City
+FROM Customer
+WHERE Country = 'Brazil';
+--*****************************************************************************************
+SELECT * FROM Employee;
+--*****************************************************************************************
+-- List all sales agents
+SELECT
+    CONCAT(FirstName, ' ', LastName) AS FullName,
+    EmployeeId, 
+    Title
+From Employee
+WHERE Title Like '%Sales%Agent%' OR Title Like '%Sales Support%';
+--*****************************************************************************************
+SELECT * FROM Invoice;
+--*****************************************************************************************
+-- Retrieve a list of all countries in billing addresses on invoices
+SELECT BillingCountry
+FROM Invoice
+ORDER BY BillingCountry;
+--*****************************************************************************************
+-- Retrieve how many invoices there were in 2009, and what was the sales total for that year?
+SELECT 
+    COUNT(*) AS InvoiceCount,
+    SUM(Total) AS TotalSales
+FROM Invoice
+WHERE YEAR(InvoiceDate) = 2009;
+ -- (challenge: find the invoice count sales total for every year using one query)
+SELECT 
+    YEAR(InvoiceDate) AS Year,
+    COUNT(*) AS InvoiceCount,
+    SUM(Total) AS TotalSales
+FROM Invoice
+GROUP BY YEAR(InvoiceDate)
+ORDER BY Year;
+-- how many line items were there for invoice #37
+SELECT COUNT(*) AS LineItems
+FROM InvoiceLine
+WHERE InvoiceId = 37;
+-- how many invoices per country? BillingCountry  # of invoices -
+SELECT 
+    BillingCountry,
+    COUNT(*) AS NumberOfInvoices
+FROM Invoice
+GROUP BY BillingCountry
+ORDER BY NumberOfInvoices DESC;
+
+-- Retrieve the total sales per country, ordered by the highest total sales first.
+SELECT 
+    BillingCountry,
+    SUM(Total) AS TotalSales
+FROM Invoice
+GROUP BY BillingCountry
+ORDER BY TotalSales DESC;
