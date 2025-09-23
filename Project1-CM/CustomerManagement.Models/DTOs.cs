@@ -1,6 +1,7 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace CustomerManagement.Models.DTOs
 {
-    // === CUSTOMER DTOs ===
     
     public class CustomerDto
     {
@@ -109,7 +110,7 @@ namespace CustomerManagement.Models.DTOs
         [Required]
         public string OrderNumber { get; set; } = string.Empty;
         
-        [Range(0.01, double.MaxValue)]
+        [Range(0.01, 999999.99)]  // Fixed Range attribute
         public decimal TotalAmount { get; set; }
         
         public string Status { get; set; } = "Pending";

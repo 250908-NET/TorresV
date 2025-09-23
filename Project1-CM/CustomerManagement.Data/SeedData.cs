@@ -1,3 +1,5 @@
+using CustomerManagement.Models;
+
 namespace CustomerManagement.Data
 {
     public static class SeedData

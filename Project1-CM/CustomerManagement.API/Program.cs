@@ -1,7 +1,7 @@
-// Program.cs in CustomerManagement.API
 using Microsoft.EntityFrameworkCore;
 using CustomerManagement.Data;
 using CustomerManagement.Models;
+using CustomerManagement.Models.DTOs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,14 +23,16 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// === CUSTOMER ENDPOINTS ===
+// GET: Test endpoint
+app.MapGet("/", () => "Customer Management API is running!")
+.WithName("HealthCheck")
+.WithOpenApi();
 
 // GET: Get all customers
 app.MapGet("/api/customers", async (CustomerContext db) =>
 {
-    return await db.Customers
+    var customers = await db.Customers
         .Include(c => c.Addresses)
-        .Include(c => c.CustomerOrders)
         .Where(c => c.IsActive)
         .Select(c => new CustomerDto
         {
@@ -40,6 +42,7 @@ app.MapGet("/api/customers", async (CustomerContext db) =>
             Phone = c.Phone,
             CreatedDate = c.CreatedDate,
             IsActive = c.IsActive,
+            CustomerType = c.CustomerType ?? "Individual",
             Addresses = c.Addresses.Select(a => new AddressDto
             {
                 AddressId = a.AddressId,
@@ -47,9 +50,12 @@ app.MapGet("/api/customers", async (CustomerContext db) =>
                 FullAddress = $"{a.Street}, {a.City}, {a.State} {a.ZipCode}",
                 IsPrimary = a.IsPrimary
             }).ToList(),
-            TotalOrders = c.CustomerOrders.Count
+            TotalOrders = c.CustomerOrders.Count,
+            TotalSpent = 0 // We'll calculate this later when we have orders
         })
         .ToListAsync();
+        
+    return Results.Ok(customers);
 })
 .WithName("GetAllCustomers")
 .WithOpenApi();
@@ -72,6 +78,7 @@ app.MapGet("/api/customers/{id}", async (int id, CustomerContext db) =>
         Phone = customer.Phone,
         CreatedDate = customer.CreatedDate,
         IsActive = customer.IsActive,
+        CustomerType = customer.CustomerType ?? "Individual",
         Addresses = customer.Addresses.Select(a => new AddressDto
         {
             AddressId = a.AddressId,
@@ -79,7 +86,8 @@ app.MapGet("/api/customers/{id}", async (int id, CustomerContext db) =>
             FullAddress = $"{a.Street}, {a.City}, {a.State} {a.ZipCode}",
             IsPrimary = a.IsPrimary
         }).ToList(),
-        TotalOrders = customer.CustomerOrders.Count
+        TotalOrders = customer.CustomerOrders.Count,
+        TotalSpent = 0 // We'll calculate this later
     };
     
     return Results.Ok(customerDto);
@@ -87,7 +95,7 @@ app.MapGet("/api/customers/{id}", async (int id, CustomerContext db) =>
 .WithName("GetCustomerById")
 .WithOpenApi();
 
-// POST: Create new customer
+// POST: Create customer
 app.MapPost("/api/customers", async (CreateCustomerDto customerDto, CustomerContext db) =>
 {
     var customer = new Customer
@@ -96,6 +104,8 @@ app.MapPost("/api/customers", async (CreateCustomerDto customerDto, CustomerCont
         LastName = customerDto.LastName,
         Email = customerDto.Email,
         Phone = customerDto.Phone,
+        CustomerType = customerDto.CustomerType,
+        Notes = customerDto.Notes,
         CreatedDate = DateTime.UtcNow,
         IsActive = true
     };
@@ -111,7 +121,7 @@ app.MapPost("/api/customers", async (CreateCustomerDto customerDto, CustomerCont
             State = customerDto.PrimaryAddress.State,
             ZipCode = customerDto.PrimaryAddress.ZipCode,
             Country = customerDto.PrimaryAddress.Country,
-            IsPrimary = true
+            IsPrimary = customerDto.PrimaryAddress.IsPrimary
         });
     }
     
@@ -134,6 +144,8 @@ app.MapPut("/api/customers/{id}", async (int id, UpdateCustomerDto customerDto, 
     customer.Email = customerDto.Email;
     customer.Phone = customerDto.Phone;
     customer.IsActive = customerDto.IsActive;
+    customer.CustomerType = customerDto.CustomerType;
+    customer.Notes = customerDto.Notes;
     customer.LastUpdated = DateTime.UtcNow;
     
     await db.SaveChangesAsync();
