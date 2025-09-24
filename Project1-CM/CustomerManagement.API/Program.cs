@@ -23,7 +23,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Health Check Endpoints
+// =====================================================
+// HEALTH CHECK ENDPOINTS
+// =====================================================
 
 // GET: Basic health check
 app.MapGet("/", () => "Customer Management API is running!")
@@ -57,7 +59,9 @@ app.MapGet("/api/health", async (CustomerContext db) =>
 .WithSummary("Health check with database info")
 .WithDescription("Check API and database health status with counts");
 
-// Customer Management Endpoints
+// =====================================================
+// CUSTOMER CRUD ENDPOINTS
+// =====================================================
 
 // GET: Get all customers
 app.MapGet("/api/customers", async (CustomerContext db) =>
@@ -83,7 +87,7 @@ app.MapGet("/api/customers", async (CustomerContext db) =>
                 IsPrimary = a.IsPrimary
             }).ToList(),
             TotalOrders = c.CustomerOrders.Count,
-            TotalSpent = 0 // We'll calculate this later when we have orders
+            TotalSpent = 0
         })
         .ToListAsync();
         
@@ -121,7 +125,7 @@ app.MapGet("/api/customers/{id}", async (int id, CustomerContext db) =>
             IsPrimary = a.IsPrimary
         }).ToList(),
         TotalOrders = customer.CustomerOrders.Count,
-        TotalSpent = 0 // We'll calculate this later
+        TotalSpent = 0
     };
     
     return Results.Ok(customerDto);
@@ -164,7 +168,28 @@ app.MapPost("/api/customers", async (CreateCustomerDto customerDto, CustomerCont
     db.Customers.Add(customer);
     await db.SaveChangesAsync();
     
-    return Results.Created($"/api/customers/{customer.CustomerId}", customer);
+    // Return DTO instead of raw entity
+    var responseDto = new CustomerDto
+    {
+        CustomerId = customer.CustomerId,
+        FullName = $"{customer.FirstName} {customer.LastName}",
+        Email = customer.Email,
+        Phone = customer.Phone,
+        CreatedDate = customer.CreatedDate,
+        IsActive = customer.IsActive,
+        CustomerType = customer.CustomerType ?? "Individual",
+        Addresses = customer.Addresses.Select(a => new AddressDto
+        {
+            AddressId = a.AddressId,
+            AddressType = a.AddressType,
+            FullAddress = $"{a.Street}, {a.City}, {a.State} {a.ZipCode}",
+            IsPrimary = a.IsPrimary
+        }).ToList(),
+        TotalOrders = 0,
+        TotalSpent = 0
+    };
+    
+    return Results.Created($"/api/customers/{customer.CustomerId}", responseDto);
 })
 .WithName("CreateCustomer")
 .WithOpenApi()
@@ -174,7 +199,11 @@ app.MapPost("/api/customers", async (CreateCustomerDto customerDto, CustomerCont
 // PUT: Update customer
 app.MapPut("/api/customers/{id}", async (int id, UpdateCustomerDto customerDto, CustomerContext db) =>
 {
-    var customer = await db.Customers.FindAsync(id);
+    var customer = await db.Customers
+        .Include(c => c.Addresses)
+        .Include(c => c.CustomerOrders)
+        .FirstOrDefaultAsync(c => c.CustomerId == id);
+        
     if (customer is null) return Results.NotFound("Customer not found");
     
     customer.FirstName = customerDto.FirstName;
@@ -188,7 +217,28 @@ app.MapPut("/api/customers/{id}", async (int id, UpdateCustomerDto customerDto, 
     
     await db.SaveChangesAsync();
     
-    return Results.Ok(customer);
+    // Return DTO instead of raw entity
+    var responseDto = new CustomerDto
+    {
+        CustomerId = customer.CustomerId,
+        FullName = $"{customer.FirstName} {customer.LastName}",
+        Email = customer.Email,
+        Phone = customer.Phone,
+        CreatedDate = customer.CreatedDate,
+        IsActive = customer.IsActive,
+        CustomerType = customer.CustomerType ?? "Individual",
+        Addresses = customer.Addresses.Select(a => new AddressDto
+        {
+            AddressId = a.AddressId,
+            AddressType = a.AddressType,
+            FullAddress = $"{a.Street}, {a.City}, {a.State} {a.ZipCode}",
+            IsPrimary = a.IsPrimary
+        }).ToList(),
+        TotalOrders = customer.CustomerOrders.Count,
+        TotalSpent = 0
+    };
+    
+    return Results.Ok(responseDto);
 })
 .WithName("UpdateCustomer")
 .WithOpenApi()
@@ -213,7 +263,9 @@ app.MapDelete("/api/customers/{id}", async (int id, CustomerContext db) =>
 .WithSummary("Delete customer")
 .WithDescription("Soft delete a customer (marks as inactive)");
 
-// Search & Filter Endpoints
+// =====================================================
+// SEARCH & FILTERING ENDPOINTS
+// =====================================================
 
 // GET: Search customers by name or email
 app.MapGet("/api/customers/search", async (string? query, CustomerContext db) =>
@@ -289,7 +341,9 @@ app.MapGet("/api/customers/filter/{customerType}", async (string customerType, C
 .WithSummary("Filter customers by type")
 .WithDescription("Get customers filtered by type: Individual, Business, or Premium");
 
-// Statistics & Reporting Endpoints
+// =====================================================
+// STATISTICS ENDPOINTS
+// =====================================================
 
 // GET: Customer statistics dashboard
 app.MapGet("/api/customers/stats", async (CustomerContext db) =>
@@ -310,7 +364,7 @@ app.MapGet("/api/customers/stats", async (CustomerContext db) =>
             {
                 CustomerType = g.Key ?? "Unknown",
                 Count = g.Count(),
-                TotalRevenue = 0 // We'll calculate this when we have proper order relationships
+                TotalRevenue = 0
             })
             .ToListAsync()
     };
@@ -322,7 +376,9 @@ app.MapGet("/api/customers/stats", async (CustomerContext db) =>
 .WithSummary("Get customer statistics")
 .WithDescription("Get comprehensive dashboard statistics about customers and orders");
 
-// Address Management Endpoints
+// =====================================================
+// ADDRESS MANAGEMENT ENDPOINTS
+// =====================================================
 
 // GET: Get customer addresses
 app.MapGet("/api/customers/{customerId}/addresses", async (int customerId, CustomerContext db) =>
@@ -382,14 +438,25 @@ app.MapPost("/api/customers/{customerId}/addresses", async (int customerId, Crea
     db.Addresses.Add(address);
     await db.SaveChangesAsync();
     
-    return Results.Created($"/api/customers/{customerId}/addresses/{address.AddressId}", address);
+    // Return DTO instead of raw entity
+    var responseDto = new AddressDto
+    {
+        AddressId = address.AddressId,
+        AddressType = address.AddressType,
+        FullAddress = $"{address.Street}, {address.City}, {address.State} {address.ZipCode}",
+        IsPrimary = address.IsPrimary
+    };
+    
+    return Results.Created($"/api/customers/{customerId}/addresses/{address.AddressId}", responseDto);
 })
 .WithName("AddCustomerAddress")
 .WithOpenApi()
 .WithSummary("Add address to customer")
 .WithDescription("Add a new address to an existing customer");
 
-// Order Management Endpoints
+// =====================================================
+// ORDER MANAGEMENT ENDPOINTS
+// =====================================================
 
 // GET: Get all orders
 app.MapGet("/api/orders", async (CustomerContext db) =>
@@ -452,14 +519,28 @@ app.MapPost("/api/orders", async (CreateOrderDto orderDto, CustomerContext db) =
     
     await db.SaveChangesAsync();
     
-    return Results.Created($"/api/orders/{order.OrderId}", order);
+    // Return DTO instead of raw entity
+    var responseDto = new OrderDto
+    {
+        OrderId = order.OrderId,
+        OrderNumber = order.OrderNumber,
+        OrderDate = order.OrderDate,
+        TotalAmount = order.TotalAmount,
+        Status = order.Status,
+        Description = order.Description,
+        Customers = new List<CustomerSummaryDto>()
+    };
+    
+    return Results.Created($"/api/orders/{order.OrderId}", responseDto);
 })
 .WithName("CreateOrder")
 .WithOpenApi()
 .WithSummary("Create new order")
 .WithDescription("Create a new order and associate it with customers");
 
-// Database seeding
+// =====================================================
+// DATABASE SEEDING
+// =====================================================
 
 using (var scope = app.Services.CreateScope())
 {
