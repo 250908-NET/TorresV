@@ -2,6 +2,10 @@ using Microsoft.EntityFrameworkCore;
 using CustomerManagement.Data;
 using CustomerManagement.Models;
 using CustomerManagement.Models.DTOs;
+using CustomerManagement.Data.Interfaces;
+using CustomerManagement.Data.Repositories;
+using CustomerManagement.Data.Services.Interface;
+using CustomerManagement.Data.Services.Implementation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +15,13 @@ builder.Services.AddDbContext<CustomerContext>(options =>
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+builder.Services.AddScoped<IAddressRepository, AddressRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IStatisticsRepository, StatisticsRepository>();
+builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<IAddressService, AddressService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 
 var app = builder.Build();
 
