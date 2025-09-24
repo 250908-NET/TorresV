@@ -6,7 +6,18 @@ namespace _5_OperatorsChallenge
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine("THis is a test");
+            Console.WriteLine("This is a test");
+            Console.WriteLine(Increment(5));
+            Console.WriteLine(Decrement(5));
+            Console.WriteLine(Not(true));
+            Console.WriteLine(Negate(5)); 
+            Console.WriteLine(Sum(3, 4)); 
+            Console.WriteLine(Diff(10, 4));
+            Console.WriteLine(Product(3, 4));
+            Console.WriteLine(Quotient(10, 2)); 
+            Console.WriteLine(Remainder(10, 3));
+            Console.WriteLine(And(5, 4)); 
+            Console.WriteLine(Or(5, -2));
         }
 
         /// <summary>
@@ -17,7 +28,7 @@ namespace _5_OperatorsChallenge
         public static int Increment(int num)
         {
             return num + 1;
-            throw new NotImplementedException($"Increment() is not implemented yet.");
+            throw new NotImplementedException($"Increment() is not implemented yet."); 
         }
 
         /// <summary>
@@ -28,7 +39,7 @@ namespace _5_OperatorsChallenge
         public static int Decrement(int num)
         {
             return num - 1;
-            throw new NotImplementedException($"Decrement() is not implemented yet");
+            throw new NotImplementedException($"Decrement() is not implemented yet");  
         }
 
         /// <summary>
@@ -75,7 +86,7 @@ namespace _5_OperatorsChallenge
         public static int Diff(int num1, int num2)
         {
             return num1 - num2;
-            throw new NotImplementedException($"Diff() is not implemented yet");
+            throw new NotImplementedException($"Diff() is not implemented yet"); 
         }
 
         /// <summary>
@@ -100,6 +111,7 @@ namespace _5_OperatorsChallenge
         {
             return num1 / num2;
             throw new NotImplementedException($"Quotient() is not implemented yet");
+            
         }
 
         /// <summary>
@@ -135,9 +147,11 @@ namespace _5_OperatorsChallenge
         /// <returns></returns>
         public static bool Or(int num1, int num2)
         {
-            
             return (num1 > num2) || (num1 > 0);
             throw new NotImplementedException($"Or() is not implemented yet");
+            
         }
     }
 }
+
+            
