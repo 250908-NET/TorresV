@@ -185,29 +185,102 @@ ORDER BY CustomerCount DESC;
 -- plan for them is the same, or different.
 
 -- 1. which artists did not make any albums at all?
+-- Method 1: Using LEFT JOIN
+SELECT ar.Name AS ArtistName
+FROM Artist ar
+LEFT JOIN Album al ON ar.ArtistId = al.ArtistId
+WHERE al.ArtistId IS NULL;
+-- Method 2: Using NOT EXISTS (subquery)
+SELECT ar.Name AS ArtistName
+FROM Artist ar
+WHERE NOT EXISTS (
+    SELECT 1 FROM Album al WHERE al.ArtistId = ar.ArtistId
 
 -- 2. which artists did not record any tracks of the Latin genre?
+ LatinArtists AS (
+    SELECT DISTINCT ar.ArtistId
+    FROM Artist ar
+    JOIN Album al ON ar.ArtistId = al.ArtistId
+    JOIN Track t ON al.AlbumId = t.AlbumId
+    JOIN Genre g ON t.GenreId = g.GenreId
+    WHERE g.Name = 'Latin'
+)
+SELECT ar.Name AS ArtistName
+FROM Artist ar
+WHERE ar.ArtistId NOT IN (SELECT ArtistId FROM LatinArtists);
 
 -- 3. which video track has the longest length? (use media type table)
+SELECT TOP 1
+    t.Name AS TrackName,
+    t.Milliseconds,
+    t.Milliseconds / 60000.0 AS Minutes,
+    mt.Name AS MediaType
+FROM Track t
+JOIN MediaType mt ON t.MediaTypeId = mt.MediaTypeId
+WHERE mt.Name LIKE '%video%'
+ORDER BY t.Milliseconds DESC;
 
 -- 4. find the names of the customers who live in the same city as the
 --    boss employee (the one who reports to nobody)
+WITH BossCity AS (
+    SELECT City
+    FROM Employee
+    WHERE ReportsTo IS NULL
+)
+SELECT CONCAT(c.FirstName, ' ', c.LastName) AS CustomerName, c.City
+FROM Customer c
+CROSS JOIN BossCity bc
+WHERE c.City = bc.City;
 
 -- 5. how many audio tracks were bought by German customers, and what was
 --    the total price paid for them?
+SELECT 
+    COUNT(il.TrackId) AS AudioTracksPurchased,
+    SUM(il.UnitPrice * il.Quantity) AS TotalPricePaid
+FROM InvoiceLine il
+JOIN Invoice i ON il.InvoiceId = i.InvoiceId
+JOIN Customer c ON i.CustomerId = c.CustomerId
+JOIN Track t ON il.TrackId = t.TrackId
+JOIN MediaType mt ON t.MediaTypeId = mt.MediaTypeId
+WHERE c.Country = 'Germany' 
+  AND mt.Name LIKE '%audio%';
 
 -- 6. list the names and countries of the customers supported by an employee
 --    who was hired younger than 35.
+SELECT 
+    CONCAT(c.FirstName, ' ', c.LastName) AS CustomerName,
+    c.Country,
+    CONCAT(e.FirstName, ' ', e.LastName) AS SupportRep,
+    DATEDIFF(YEAR, e.BirthDate, e.HireDate) AS AgeWhenHired
+FROM Customer c
+JOIN Employee e ON c.SupportRepId = e.EmployeeId
+WHERE DATEDIFF(YEAR, e.BirthDate, e.HireDate) < 35;
 
 
 -- DML exercises
 
 -- 1. insert two new records into the employee table.
+INSERT INTO Employee (LastName, FirstName, Title, ReportsTo, BirthDate, HireDate, Address, City, State, Country, PostalCode, Phone, Fax, Email)
+VALUES 
+('Smith', 'John', 'Sales Support Agent', 2, '1990-05-15', '2023-01-10', '123 Main St', 'Seattle', 'WA', 'USA', '98101', '+1 (206) 555-0123', '+1 (206) 555-0124', 'john.smith@chinookcorp.com'),
+('Johnson', 'Sarah', 'Sales Support Agent', 2, '1985-08-22', '2023-02-15', '456 Oak Ave', 'Portland', 'OR', 'USA', '97201', '+1 (503) 555-0125', '+1 (503) 555-0126', 'sarah.johnson@chinookcorp.com');
+
 
 -- 2. insert two new records into the tracks table.
+INSERT INTO Track (Name, AlbumId, MediaTypeId, GenreId, Composer, Milliseconds, Bytes, UnitPrice)
+VALUES 
+('New Rock Song', 1, 1, 1, 'Unknown Artist', 240000, 7500000, 0.99),
+('Another Great Track', 1, 1, 1, 'Mystery Composer', 180000, 6000000, 0.99);
 
 -- 3. update customer Aaron Mitchell's name to Robert Walter
+UPDATE Customer 
+SET FirstName = 'Robert', LastName = 'Walter'
+WHERE FirstName = 'Aaron' AND LastName = 'Mitchell';
 
 -- 4. delete one of the employees you inserted.
+DELETE FROM Employee 
+WHERE Email = 'sarah.johnson@chinookcorp.com';
 
 -- 5. delete customer Robert Walter.
+DELETE FROM Customer 
+WHERE FirstName = 'Robert' AND LastName = 'Walter';
