@@ -8,7 +8,7 @@ namespace CustomerManagement.Data
         {
             if (context.Customers.Any())
                 return; // DB has been seeded
-                
+
             var customers = new Customer[]
             {
                 new Customer
@@ -36,10 +36,10 @@ namespace CustomerManagement.Data
                     CustomerType = "Business"
                 }
             };
-            
+
             context.Customers.AddRange(customers);
             context.SaveChanges();
-            
+
             // Add sample addresses
             var addresses = new Address[]
             {
@@ -64,10 +64,10 @@ namespace CustomerManagement.Data
                     IsPrimary = true
                 }
             };
-            
+
             context.Addresses.AddRange(addresses);
             context.SaveChanges();
-            
+
             // Add sample orders
             var orders = new Order[]
             {
@@ -86,10 +86,10 @@ namespace CustomerManagement.Data
                     Description = "Second sample order"
                 }
             };
-            
+
             context.Orders.AddRange(orders);
             context.SaveChanges();
-            
+
             // Create customer-order relationships (Many-to-Many)
             var customerOrders = new CustomerOrder[]
             {
@@ -112,7 +112,7 @@ namespace CustomerManagement.Data
                     Role = "Secondary"
                 }
             };
-            
+
             context.CustomerOrders.AddRange(customerOrders);
             context.SaveChanges();
         }
