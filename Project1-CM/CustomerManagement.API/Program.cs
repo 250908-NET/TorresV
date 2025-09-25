@@ -426,10 +426,6 @@ app.MapDelete("/api/customers/{id}", async (int id, CustomerContext db) =>
 .WithSummary("Delete customer")
 .WithDescription("Soft delete a customer (marks as inactive)");
 
-// =====================================================
-// SEARCH & FILTERING ENDPOINTS
-// =====================================================
-
 // GET: Search customers by name or email
 app.MapGet("/api/customers/search", async (string? query, CustomerContext db) =>
 {
@@ -504,10 +500,6 @@ app.MapGet("/api/customers/filter/{customerType}", async (string customerType, C
 .WithSummary("Filter customers by type")
 .WithDescription("Get customers filtered by type: Individual, Business, or Premium");
 
-// =====================================================
-// STATISTICS ENDPOINTS
-// =====================================================
-
 // GET: Customer statistics dashboard
 app.MapGet("/api/customers/stats", async (CustomerContext db) =>
 {
@@ -538,10 +530,6 @@ app.MapGet("/api/customers/stats", async (CustomerContext db) =>
 .WithOpenApi()
 .WithSummary("Get customer statistics")
 .WithDescription("Get comprehensive dashboard statistics about customers and orders");
-
-// =====================================================
-// ADDRESS MANAGEMENT ENDPOINTS
-// =====================================================
 
 // GET: Get customer addresses
 app.MapGet("/api/customers/{customerId}/addresses", async (int customerId, CustomerContext db) =>
@@ -616,10 +604,6 @@ app.MapPost("/api/customers/{customerId}/addresses", async (int customerId, Crea
 .WithOpenApi()
 .WithSummary("Add address to customer")
 .WithDescription("Add a new address to an existing customer");
-
-// =====================================================
-// ORDER MANAGEMENT ENDPOINTS
-// =====================================================
 
 // GET: Get all orders
 app.MapGet("/api/orders", async (CustomerContext db) =>
@@ -701,10 +685,7 @@ app.MapPost("/api/orders", async (CreateOrderDto orderDto, CustomerContext db) =
 .WithSummary("Create new order")
 .WithDescription("Create a new order and associate it with customers");
 
-// =====================================================
-// DATABASE SEEDING
-// =====================================================
-
+// Database seeding
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<CustomerContext>();
