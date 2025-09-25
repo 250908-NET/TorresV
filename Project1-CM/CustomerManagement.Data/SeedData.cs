@@ -6,8 +6,14 @@ namespace CustomerManagement.Data
     {
         public static void Initialize(CustomerContext context)
         {
+            // Check if database already has data - if so, don't seed
             if (context.Customers.Any())
+            {
+                Console.WriteLine("Database already contains data. Skipping seeding.");
                 return; // DB has been seeded
+            }
+
+            Console.WriteLine("Seeding database with sample data...");
 
             var customers = new Customer[]
             {
@@ -17,7 +23,8 @@ namespace CustomerManagement.Data
                     LastName = "Doe",
                     Email = "john.doe@email.com",
                     Phone = "(555) 123-4567",
-                    CustomerType = "Individual"
+                    CustomerType = "Individual",
+                    CreatedDate = DateTime.UtcNow
                 },
                 new Customer
                 {
@@ -25,7 +32,8 @@ namespace CustomerManagement.Data
                     LastName = "Smith",
                     Email = "jane.smith@email.com",
                     Phone = "(555) 987-6543",
-                    CustomerType = "Premium"
+                    CustomerType = "Premium",
+                    CreatedDate = DateTime.UtcNow
                 },
                 new Customer
                 {
@@ -33,7 +41,8 @@ namespace CustomerManagement.Data
                     LastName = "Corporation",
                     Email = "contact@acme.com",
                     Phone = "(555) 555-0123",
-                    CustomerType = "Business"
+                    CustomerType = "Business",
+                    CreatedDate = DateTime.UtcNow
                 }
             };
 
@@ -45,7 +54,7 @@ namespace CustomerManagement.Data
             {
                 new Address
                 {
-                    CustomerId = 1,
+                    CustomerId = customers[0].CustomerId,
                     AddressType = "Home",
                     Street = "123 Main St",
                     City = "Anytown",
@@ -55,7 +64,7 @@ namespace CustomerManagement.Data
                 },
                 new Address
                 {
-                    CustomerId = 2,
+                    CustomerId = customers[1].CustomerId,
                     AddressType = "Work",
                     Street = "456 Business Ave",
                     City = "Commerce City",
@@ -76,14 +85,16 @@ namespace CustomerManagement.Data
                     OrderNumber = "ORD-001",
                     TotalAmount = 299.99m,
                     Status = "Completed",
-                    Description = "First sample order"
+                    Description = "First sample order",
+                    OrderDate = DateTime.UtcNow
                 },
                 new Order
                 {
                     OrderNumber = "ORD-002",
                     TotalAmount = 149.50m,
                     Status = "Pending",
-                    Description = "Second sample order"
+                    Description = "Second sample order",
+                    OrderDate = DateTime.UtcNow
                 }
             };
 
@@ -95,26 +106,24 @@ namespace CustomerManagement.Data
             {
                 new CustomerOrder
                 {
-                    CustomerId = 1,
-                    OrderId = 1,
-                    Role = "Primary"
+                    CustomerId = customers[0].CustomerId,
+                    OrderId = orders[0].OrderId,
+                    Role = "Primary",
+                    AssignedDate = DateTime.UtcNow
                 },
                 new CustomerOrder
                 {
-                    CustomerId = 2,
-                    OrderId = 2,
-                    Role = "Primary"
-                },
-                new CustomerOrder
-                {
-                    CustomerId = 1,
-                    OrderId = 2,
-                    Role = "Secondary"
+                    CustomerId = customers[1].CustomerId,
+                    OrderId = orders[1].OrderId,
+                    Role = "Primary",
+                    AssignedDate = DateTime.UtcNow
                 }
             };
 
             context.CustomerOrders.AddRange(customerOrders);
             context.SaveChanges();
+
+            Console.WriteLine("Database seeding completed successfully.");
         }
     }
 }

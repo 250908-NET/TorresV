@@ -15,10 +15,14 @@ builder.Services.AddDbContext<CustomerContext>(options =>
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Register repositories
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<IAddressRepository, AddressRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IStatisticsRepository, StatisticsRepository>();
+
+// Register services
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IAddressService, AddressService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
@@ -138,68 +142,128 @@ app.MapGet("/api/customers/{id}", async (int id, CustomerContext db) =>
 .WithSummary("Get customer by ID")
 .WithDescription("Retrieve a specific customer by their ID with full details");
 
+// GET: Get inactive customers
+app.MapGet("/api/customers/inactive", async (CustomerContext db) =>
+{
+    var customers = await db.Customers
+        .Include(c => c.Addresses)
+        .Include(c => c.CustomerOrders)
+        .Where(c => !c.IsActive)
+        .Select(c => new CustomerDto
+        {
+            CustomerId = c.CustomerId,
+            FullName = $"{c.FirstName} {c.LastName}",
+            Email = c.Email,
+            Phone = c.Phone,
+            CreatedDate = c.CreatedDate,
+            IsActive = c.IsActive,
+            CustomerType = c.CustomerType ?? "Individual",
+            Addresses = c.Addresses.Select(a => new AddressDto
+            {
+                AddressId = a.AddressId,
+                AddressType = a.AddressType,
+                FullAddress = $"{a.Street}, {a.City}, {a.State} {a.ZipCode}",
+                IsPrimary = a.IsPrimary
+            }).ToList(),
+            TotalOrders = c.CustomerOrders.Count,
+            TotalSpent = 0
+        })
+        .ToListAsync();
+        
+    return Results.Ok(customers);
+})
+.WithName("GetInactiveCustomers")
+.WithOpenApi()
+.WithSummary("Get inactive customers")
+.WithDescription("Retrieve all inactive (soft deleted) customers");
+
 // POST: Create customer
 app.MapPost("/api/customers", async (CreateCustomerDto customerDto, CustomerContext db) =>
 {
-    var customer = new Customer
+    try
     {
-        FirstName = customerDto.FirstName,
-        LastName = customerDto.LastName,
-        Email = customerDto.Email,
-        Phone = customerDto.Phone,
-        CustomerType = customerDto.CustomerType,
-        Notes = customerDto.Notes,
-        CreatedDate = DateTime.UtcNow,
-        IsActive = true
-    };
-    
-    // Add primary address if provided
-    if (customerDto.PrimaryAddress != null)
-    {
-        customer.Addresses.Add(new Address
+        // Check for duplicate email
+        var existingCustomer = await db.Customers
+            .FirstOrDefaultAsync(c => c.Email == customerDto.Email);
+            
+        if (existingCustomer != null)
         {
-            AddressType = customerDto.PrimaryAddress.AddressType,
-            Street = customerDto.PrimaryAddress.Street,
-            City = customerDto.PrimaryAddress.City,
-            State = customerDto.PrimaryAddress.State,
-            ZipCode = customerDto.PrimaryAddress.ZipCode,
-            Country = customerDto.PrimaryAddress.Country,
-            IsPrimary = customerDto.PrimaryAddress.IsPrimary
+            return Results.BadRequest(new 
+            { 
+                error = "Email already exists",
+                message = $"A customer with email '{customerDto.Email}' already exists.",
+                field = "email"
+            });
+        }
+        
+        var customer = new Customer
+        {
+            FirstName = customerDto.FirstName,
+            LastName = customerDto.LastName,
+            Email = customerDto.Email,
+            Phone = customerDto.Phone,
+            CustomerType = customerDto.CustomerType,
+            Notes = customerDto.Notes,
+            CreatedDate = DateTime.UtcNow,
+            IsActive = true
+        };
+        
+        // Add primary address if provided
+        if (customerDto.PrimaryAddress != null)
+        {
+            customer.Addresses.Add(new Address
+            {
+                AddressType = customerDto.PrimaryAddress.AddressType,
+                Street = customerDto.PrimaryAddress.Street,
+                City = customerDto.PrimaryAddress.City,
+                State = customerDto.PrimaryAddress.State,
+                ZipCode = customerDto.PrimaryAddress.ZipCode,
+                Country = customerDto.PrimaryAddress.Country,
+                IsPrimary = customerDto.PrimaryAddress.IsPrimary
+            });
+        }
+        
+        db.Customers.Add(customer);
+        await db.SaveChangesAsync();
+        
+        // Return DTO instead of raw entity
+        var responseDto = new CustomerDto
+        {
+            CustomerId = customer.CustomerId,
+            FullName = $"{customer.FirstName} {customer.LastName}",
+            Email = customer.Email,
+            Phone = customer.Phone,
+            CreatedDate = customer.CreatedDate,
+            IsActive = customer.IsActive,
+            CustomerType = customer.CustomerType ?? "Individual",
+            Addresses = customer.Addresses.Select(a => new AddressDto
+            {
+                AddressId = a.AddressId,
+                AddressType = a.AddressType,
+                FullAddress = $"{a.Street}, {a.City}, {a.State} {a.ZipCode}",
+                IsPrimary = a.IsPrimary
+            }).ToList(),
+            TotalOrders = 0,
+            TotalSpent = 0
+        };
+        
+        return Results.Created($"/api/customers/{customer.CustomerId}", responseDto);
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(new 
+        { 
+            error = "Validation failed",
+            message = ex.Message
         });
     }
-    
-    db.Customers.Add(customer);
-    await db.SaveChangesAsync();
-    
-    // Return DTO instead of raw entity
-    var responseDto = new CustomerDto
-    {
-        CustomerId = customer.CustomerId,
-        FullName = $"{customer.FirstName} {customer.LastName}",
-        Email = customer.Email,
-        Phone = customer.Phone,
-        CreatedDate = customer.CreatedDate,
-        IsActive = customer.IsActive,
-        CustomerType = customer.CustomerType ?? "Individual",
-        Addresses = customer.Addresses.Select(a => new AddressDto
-        {
-            AddressId = a.AddressId,
-            AddressType = a.AddressType,
-            FullAddress = $"{a.Street}, {a.City}, {a.State} {a.ZipCode}",
-            IsPrimary = a.IsPrimary
-        }).ToList(),
-        TotalOrders = 0,
-        TotalSpent = 0
-    };
-    
-    return Results.Created($"/api/customers/{customer.CustomerId}", responseDto);
 })
 .WithName("CreateCustomer")
 .WithOpenApi()
 .WithSummary("Create new customer")
 .WithDescription("Create a new customer with optional primary address");
 
-// PUT: Update customer
+// PUT: Update customer (full update)
 app.MapPut("/api/customers/{id}", async (int id, UpdateCustomerDto customerDto, CustomerContext db) =>
 {
     var customer = await db.Customers
@@ -208,6 +272,20 @@ app.MapPut("/api/customers/{id}", async (int id, UpdateCustomerDto customerDto, 
         .FirstOrDefaultAsync(c => c.CustomerId == id);
         
     if (customer is null) return Results.NotFound("Customer not found");
+    
+    // Check for duplicate email (excluding current customer)
+    var existingCustomer = await db.Customers
+        .FirstOrDefaultAsync(c => c.Email == customerDto.Email && c.CustomerId != id);
+        
+    if (existingCustomer != null)
+    {
+        return Results.BadRequest(new 
+        { 
+            error = "Email already exists",
+            message = $"A customer with email '{customerDto.Email}' already exists.",
+            field = "email"
+        });
+    }
     
     customer.FirstName = customerDto.FirstName;
     customer.LastName = customerDto.LastName;
@@ -248,23 +326,109 @@ app.MapPut("/api/customers/{id}", async (int id, UpdateCustomerDto customerDto, 
 .WithSummary("Update customer")
 .WithDescription("Update an existing customer's information");
 
+// PATCH: Partial update customer
+app.MapPatch("/api/customers/{id}", async (int id, UpdateCustomerPartialDto customerDto, CustomerContext db) =>
+{
+    var customer = await db.Customers
+        .Include(c => c.Addresses)
+        .Include(c => c.CustomerOrders)
+        .FirstOrDefaultAsync(c => c.CustomerId == id);
+        
+    if (customer is null) return Results.NotFound("Customer not found");
+    
+    // Check for duplicate email (excluding current customer) only if email is being updated
+    if (!string.IsNullOrEmpty(customerDto.Email) && customerDto.Email != customer.Email)
+    {
+        var existingCustomer = await db.Customers
+            .FirstOrDefaultAsync(c => c.Email == customerDto.Email && c.CustomerId != id);
+            
+        if (existingCustomer != null)
+        {
+            return Results.BadRequest(new 
+            { 
+                error = "Email already exists",
+                message = $"A customer with email '{customerDto.Email}' already exists.",
+                field = "email"
+            });
+        }
+    }
+    
+    // Update only the fields that are provided
+    if (!string.IsNullOrEmpty(customerDto.FirstName))
+        customer.FirstName = customerDto.FirstName;
+    if (!string.IsNullOrEmpty(customerDto.LastName))
+        customer.LastName = customerDto.LastName;
+    if (!string.IsNullOrEmpty(customerDto.Email))
+        customer.Email = customerDto.Email;
+    if (!string.IsNullOrEmpty(customerDto.Phone))
+        customer.Phone = customerDto.Phone;
+    if (customerDto.IsActive.HasValue)
+        customer.IsActive = customerDto.IsActive.Value;
+    if (!string.IsNullOrEmpty(customerDto.CustomerType))
+        customer.CustomerType = customerDto.CustomerType;
+    if (!string.IsNullOrEmpty(customerDto.Notes))
+        customer.Notes = customerDto.Notes;
+        
+    customer.LastUpdated = DateTime.UtcNow;
+    
+    await db.SaveChangesAsync();
+    
+    // Return DTO
+    var responseDto = new CustomerDto
+    {
+        CustomerId = customer.CustomerId,
+        FullName = $"{customer.FirstName} {customer.LastName}",
+        Email = customer.Email,
+        Phone = customer.Phone,
+        CreatedDate = customer.CreatedDate,
+        IsActive = customer.IsActive,
+        CustomerType = customer.CustomerType ?? "Individual",
+        Addresses = customer.Addresses.Select(a => new AddressDto
+        {
+            AddressId = a.AddressId,
+            AddressType = a.AddressType,
+            FullAddress = $"{a.Street}, {a.City}, {a.State} {a.ZipCode}",
+            IsPrimary = a.IsPrimary
+        }).ToList(),
+        TotalOrders = customer.CustomerOrders.Count,
+        TotalSpent = 0
+    };
+    
+    return Results.Ok(responseDto);
+})
+.WithName("PartialUpdateCustomer")
+.WithOpenApi()
+.WithSummary("Partially update customer")
+.WithDescription("Update only the specified fields of an existing customer");
+
 // DELETE: Delete customer (soft delete)
 app.MapDelete("/api/customers/{id}", async (int id, CustomerContext db) =>
 {
     var customer = await db.Customers.FindAsync(id);
-    if (customer is null) return Results.NotFound("Customer not found");
+    if (customer is null) 
+        return Results.NotFound(new { message = "Customer not found" });
 
+    // Soft delete
     customer.IsActive = false;
     customer.LastUpdated = DateTime.UtcNow;
 
     await db.SaveChangesAsync();
 
-    return Results.NoContent();
+    return Results.Ok(new 
+    { 
+        message = "Customer successfully deactivated (soft deleted)",
+        customerId = id,
+        timestamp = DateTime.UtcNow
+    });
 })
 .WithName("DeleteCustomer")
 .WithOpenApi()
 .WithSummary("Delete customer")
 .WithDescription("Soft delete a customer (marks as inactive)");
+
+// =====================================================
+// SEARCH & FILTERING ENDPOINTS
+// =====================================================
 
 // GET: Search customers by name or email
 app.MapGet("/api/customers/search", async (string? query, CustomerContext db) =>
@@ -340,6 +504,10 @@ app.MapGet("/api/customers/filter/{customerType}", async (string customerType, C
 .WithSummary("Filter customers by type")
 .WithDescription("Get customers filtered by type: Individual, Business, or Premium");
 
+// =====================================================
+// STATISTICS ENDPOINTS
+// =====================================================
+
 // GET: Customer statistics dashboard
 app.MapGet("/api/customers/stats", async (CustomerContext db) =>
 {
@@ -370,6 +538,10 @@ app.MapGet("/api/customers/stats", async (CustomerContext db) =>
 .WithOpenApi()
 .WithSummary("Get customer statistics")
 .WithDescription("Get comprehensive dashboard statistics about customers and orders");
+
+// =====================================================
+// ADDRESS MANAGEMENT ENDPOINTS
+// =====================================================
 
 // GET: Get customer addresses
 app.MapGet("/api/customers/{customerId}/addresses", async (int customerId, CustomerContext db) =>
@@ -444,6 +616,10 @@ app.MapPost("/api/customers/{customerId}/addresses", async (int customerId, Crea
 .WithOpenApi()
 .WithSummary("Add address to customer")
 .WithDescription("Add a new address to an existing customer");
+
+// =====================================================
+// ORDER MANAGEMENT ENDPOINTS
+// =====================================================
 
 // GET: Get all orders
 app.MapGet("/api/orders", async (CustomerContext db) =>
@@ -525,11 +701,19 @@ app.MapPost("/api/orders", async (CreateOrderDto orderDto, CustomerContext db) =
 .WithSummary("Create new order")
 .WithDescription("Create a new order and associate it with customers");
 
+// =====================================================
+// DATABASE SEEDING
+// =====================================================
+
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<CustomerContext>();
     try
     {
+        // Ensure database is created
+        context.Database.EnsureCreated();
+        
+        // Only seed if no data exists
         SeedData.Initialize(context);
     }
     catch (Exception ex)
