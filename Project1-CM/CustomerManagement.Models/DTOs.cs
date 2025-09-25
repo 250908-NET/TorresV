@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace CustomerManagement.Models.DTOs
 {
-
+    // Customer DTO
     public class CustomerDto
     {
         public int CustomerId { get; set; }
@@ -16,7 +16,7 @@ namespace CustomerManagement.Models.DTOs
         public int TotalOrders { get; set; }
         public decimal TotalSpent { get; set; }
     }
-
+    // Create Customer DTO
     public class CreateCustomerDto
     {
         [Required]
@@ -39,6 +39,7 @@ namespace CustomerManagement.Models.DTOs
         public CreateAddressDto? PrimaryAddress { get; set; }
     }
 
+// Update Customer DTO
     public class UpdateCustomerDto
     {
         [Required]
@@ -63,7 +64,6 @@ namespace CustomerManagement.Models.DTOs
 
     //Customer Partial DTO
 
-    // DTOs.cs should ONLY contain class definitions like this:
 public class UpdateCustomerPartialDto
 {
     public string? FirstName { get; set; }
@@ -74,8 +74,7 @@ public class UpdateCustomerPartialDto
     public string? CustomerType { get; set; }
     public string? Notes { get; set; }
 }
-
-    // === ADDRESS DTOs ===
+    // Address DTO
 
     public class AddressDto
     {
@@ -84,7 +83,7 @@ public class UpdateCustomerPartialDto
         public string FullAddress { get; set; } = string.Empty;
         public bool IsPrimary { get; set; }
     }
-
+    // Create Address DTO
     public class CreateAddressDto
     {
         [Required]
@@ -106,7 +105,7 @@ public class UpdateCustomerPartialDto
         public bool IsPrimary { get; set; } = false;
     }
 
-    // === ORDER DTOs ===
+    // Order DTO
 
     public class OrderDto
     {
@@ -118,7 +117,7 @@ public class UpdateCustomerPartialDto
         public string? Description { get; set; }
         public List<CustomerSummaryDto> Customers { get; set; } = new();
     }
-
+    // Create Order DTO
     public class CreateOrderDto
     {
         [Required]
@@ -132,7 +131,7 @@ public class UpdateCustomerPartialDto
         public List<int> CustomerIds { get; set; } = new();
     }
 
-    // === HELPER DTOs ===
+    // Customer Summary DTO
 
     public class CustomerSummaryDto
     {
@@ -141,7 +140,7 @@ public class UpdateCustomerPartialDto
         public string Email { get; set; } = string.Empty;
         public string Role { get; set; } = string.Empty;
     }
-
+    //Customer Stats DTO
     public class CustomerStatsDto
     {
         public int TotalCustomers { get; set; }
@@ -151,7 +150,7 @@ public class UpdateCustomerPartialDto
         public decimal TotalRevenue { get; set; }
         public List<CustomerTypeStatsDto> CustomerTypeBreakdown { get; set; } = new();
     }
-
+    //Customer type DTO
     public class CustomerTypeStatsDto
     {
         public string CustomerType { get; set; } = string.Empty;
