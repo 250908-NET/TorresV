@@ -2,6 +2,7 @@ using CustomerManagement.Models;
 
 namespace CustomerManagement.Data.Interfaces
 {
+    //Address repository interface
     public interface IAddressRepository
     {
         Task<List<Address>> GetByCustomerIdAsync(int customerId);

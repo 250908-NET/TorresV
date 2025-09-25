@@ -13,24 +13,28 @@ namespace CustomerManagement.Data.Services.Implementation
         {
             _orderRepository = orderRepository;
         }
+        // CRUD Operations for Orders
 
         public async Task<List<OrderDto>> GetAllOrdersAsync()
         {
             var orders = await _orderRepository.GetAllAsync();
             return orders.Select(MapToOrderDto).ToList();
         }
+        // Get order by ID
 
         public async Task<OrderDto?> GetOrderByIdAsync(int id)
         {
             var order = await _orderRepository.GetByIdAsync(id);
             return order == null ? null : MapToOrderDto(order);
         }
+        // Get orders by Customer ID
 
         public async Task<List<OrderDto>> GetOrdersByCustomerIdAsync(int customerId)
         {
             var orders = await _orderRepository.GetByCustomerIdAsync(customerId);
             return orders.Select(MapToOrderDto).ToList();
         }
+        // Create a new order
 
         public async Task<OrderDto> CreateOrderAsync(CreateOrderDto createOrderDto)
         {
@@ -63,6 +67,7 @@ namespace CustomerManagement.Data.Services.Implementation
 
             return MapToOrderDto(order);
         }
+        // Update an existing order
 
         public async Task<OrderDto> UpdateOrderAsync(int id, CreateOrderDto updateOrderDto)
         {
@@ -80,6 +85,7 @@ namespace CustomerManagement.Data.Services.Implementation
 
             return MapToOrderDto(order);
         }
+        // Delete an order
 
         public async Task<bool> DeleteOrderAsync(int id)
         {
@@ -90,6 +96,7 @@ namespace CustomerManagement.Data.Services.Implementation
             await _orderRepository.SaveChangesAsync();
             return true;
         }
+        // Helper method to map Order to OrderDto
 
         private OrderDto MapToOrderDto(Order order)
         {

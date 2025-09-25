@@ -2,6 +2,7 @@ using CustomerManagement.Models;
 
 namespace CustomerManagement.Data.Interfaces
 {
+    //customer repository interface
     public interface ICustomerRepository
     {
         Task<List<Customer>> GetAllActiveAsync();

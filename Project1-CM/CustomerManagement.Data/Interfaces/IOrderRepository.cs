@@ -2,6 +2,7 @@ using CustomerManagement.Models;
 
 namespace CustomerManagement.Data.Interfaces
 {
+       //Order repository interface 
     public interface IOrderRepository
     {
         Task<List<Order>> GetAllAsync();

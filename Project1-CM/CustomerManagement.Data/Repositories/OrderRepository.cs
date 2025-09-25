@@ -12,6 +12,7 @@ namespace CustomerManagement.Data.Repositories
         {
             _context = context;
         }
+        // CRUD operations for Orders
 
         public async Task<List<Order>> GetAllAsync()
         {
@@ -20,6 +21,7 @@ namespace CustomerManagement.Data.Repositories
                 .ThenInclude(co => co.Customer)
                 .ToListAsync();
         }
+        // Get order by ID including associated customers
 
         public async Task<Order?> GetByIdAsync(int id)
         {
@@ -28,6 +30,7 @@ namespace CustomerManagement.Data.Repositories
                 .ThenInclude(co => co.Customer)
                 .FirstOrDefaultAsync(o => o.OrderId == id);
         }
+        // Get orders by Customer ID
 
         public async Task<List<Order>> GetByCustomerIdAsync(int customerId)
         {
@@ -36,16 +39,17 @@ namespace CustomerManagement.Data.Repositories
                 .Where(o => o.CustomerOrders.Any(co => co.CustomerId == customerId))
                 .ToListAsync();
         }
-
+        // Add, Update, Delete operations
         public async Task AddAsync(Order order)
         {
             await _context.Orders.AddAsync(order);
         }
-
+        // Update an existing order
         public async Task UpdateAsync(Order order)
         {
             _context.Orders.Update(order);
         }
+        // Delete an order by ID
 
         public async Task DeleteAsync(int id)
         {
@@ -55,11 +59,13 @@ namespace CustomerManagement.Data.Repositories
                 _context.Orders.Remove(order);
             }
         }
+        // Add a new CustomerOrder association
 
         public async Task AddCustomerOrderAsync(CustomerOrder customerOrder)
         {
             await _context.CustomerOrders.AddAsync(customerOrder);
         }
+        // Save changes to the database
 
         public async Task SaveChangesAsync()
         {

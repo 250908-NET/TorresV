@@ -9,24 +9,27 @@ namespace CustomerManagement.Data.Services.Implementation
     {
         private readonly IAddressRepository _addressRepository;
         private readonly ICustomerRepository _customerRepository;
-
+        // Add other repositories if needed
         public AddressService(IAddressRepository addressRepository, ICustomerRepository customerRepository)
         {
             _addressRepository = addressRepository;
             _customerRepository = customerRepository;
         }
+        // Implement GET all addresses for a customer
 
         public async Task<List<AddressDto>> GetCustomerAddressesAsync(int customerId)
         {
             var addresses = await _addressRepository.GetByCustomerIdAsync(customerId);
             return addresses.Select(MapToAddressDto).ToList();
         }
+        // Implement get address by ID
 
         public async Task<AddressDto?> GetAddressByIdAsync(int addressId)
         {
             var address = await _addressRepository.GetByIdAsync(addressId);
             return address == null ? null : MapToAddressDto(address);
         }
+        // Implement create address
 
         public async Task<AddressDto> CreateAddressAsync(int customerId, CreateAddressDto createAddressDto)
         {
@@ -57,7 +60,7 @@ namespace CustomerManagement.Data.Services.Implementation
 
             return MapToAddressDto(address);
         }
-
+        // Implement update address
         public async Task<AddressDto> UpdateAddressAsync(int addressId, CreateAddressDto updateAddressDto)
         {
             var address = await _addressRepository.GetByIdAsync(addressId);
@@ -77,6 +80,7 @@ namespace CustomerManagement.Data.Services.Implementation
 
             return MapToAddressDto(address);
         }
+        // Implement delete address
 
         public async Task<bool> DeleteAddressAsync(int addressId)
         {
@@ -87,13 +91,14 @@ namespace CustomerManagement.Data.Services.Implementation
             await _addressRepository.SaveChangesAsync();
             return true;
         }
-
+        // Implement set primary address
         public async Task<bool> SetPrimaryAddressAsync(int customerId, int addressId)
         {
             await _addressRepository.SetPrimaryAddressAsync(customerId, addressId);
             await _addressRepository.SaveChangesAsync();
             return true;
         }
+        // Mapping method
 
         private AddressDto MapToAddressDto(Address address)
         {

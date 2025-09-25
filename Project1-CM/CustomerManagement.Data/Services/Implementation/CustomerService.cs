@@ -15,30 +15,34 @@ namespace CustomerManagement.Data.Services.Implementation
             _customerRepository = customerRepository;
             _statisticsRepository = statisticsRepository;
         }
+        // Get all active customers with their primary address and order count
 
         public async Task<List<CustomerDto>> GetAllActiveCustomersAsync()
         {
             var customers = await _customerRepository.GetAllActiveAsync();
             return customers.Select(MapToCustomerDto).ToList();
         }
-
+        // Get customer by ID with detailed information
         public async Task<CustomerDto?> GetCustomerByIdAsync(int id)
         {
             var customer = await _customerRepository.GetByIdWithIncludesAsync(id);
             return customer == null ? null : MapToCustomerDto(customer);
         }
+        // Search customers by name or email
 
         public async Task<List<CustomerDto>> SearchCustomersAsync(string query)
         {
             var customers = await _customerRepository.SearchAsync(query);
             return customers.Select(MapToCustomerDto).ToList();
         }
+        // Filter customers by type (e.g., Individual, Business)
 
         public async Task<List<CustomerDto>> FilterCustomersByTypeAsync(string customerType)
         {
             var customers = await _customerRepository.FilterByTypeAsync(customerType);
             return customers.Select(MapToCustomerDto).ToList();
         }
+        // Create a new customer with validation for unique email
 
         public async Task<CustomerDto> CreateCustomerAsync(CreateCustomerDto createCustomerDto)
         {
@@ -80,6 +84,7 @@ namespace CustomerManagement.Data.Services.Implementation
 
             return MapToCustomerDto(customer);
         }
+        // Update existing customer details with validation for unique email
 
         public async Task<CustomerDto> UpdateCustomerAsync(int id, UpdateCustomerDto updateCustomerDto)
         {
@@ -106,6 +111,7 @@ namespace CustomerManagement.Data.Services.Implementation
 
             return MapToCustomerDto(customer);
         }
+        // Delete customer by ID with check for existing orders
 
         public async Task<bool> DeleteCustomerAsync(int id)
         {
@@ -116,11 +122,13 @@ namespace CustomerManagement.Data.Services.Implementation
             await _customerRepository.SaveChangesAsync();
             return true;
         }
+        // Get customer statistics like total customers, active customers.
 
         public async Task<CustomerStatsDto> GetCustomerStatisticsAsync()
         {
             return await _statisticsRepository.GetCustomerStatisticsAsync();
         }
+        // Helper method to map Customer entity to CustomerDto
 
         private CustomerDto MapToCustomerDto(Customer customer)
         {
