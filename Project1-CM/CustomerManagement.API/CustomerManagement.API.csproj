@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.4">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.9" />
@@ -21,5 +25,13 @@
     <ProjectReference Include="..\CustomerManagement.Models\CustomerManagement.Models.csproj" />
     <ProjectReference Include="..\CustomerManagement.Data\CustomerManagement.Data.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+  <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
+  <PackageReference Include="coverlet.collector" Version="6.0.0" />
+  <PackageReference Include="xunit" Version="2.6.0" />
+  <PackageReference Include="xunit.runner.visualstudio" Version="2.6.0" />
+</ItemGroup>
+
 
 </Project>
