@@ -1,0 +1,3 @@
+[submodule "trainer-code"]
+	path = trainer-code
+	url = https://github.com/250908-NET/trainer-code.git
