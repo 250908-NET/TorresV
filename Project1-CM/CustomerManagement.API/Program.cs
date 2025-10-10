@@ -16,6 +16,15 @@ builder.Services.AddDbContext<CustomerContext>(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Add CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp",
+        policy => policy.WithOrigins("http://localhost:3000", "http://localhost:5173")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod());
+});
+
 // Register repositories
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<IAddressRepository, AddressRepository>();
@@ -37,6 +46,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowReactApp");
 
 // GET: Basic health check
 app.MapGet("/", () => "Customer Management API is running!")
